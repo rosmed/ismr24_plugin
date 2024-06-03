@@ -1,1 +1,0 @@
-# ismr24_plugin
