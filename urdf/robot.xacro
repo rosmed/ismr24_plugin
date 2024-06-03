@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="ISMR24">
+
+  <xacro:macro name="ismr24_robot" params="prefix L">
+    <xacro:property name="length" value="${L}"/>
+    <xacro:property name="radius" value="0.1"/>
+
+    <link name="${prefix}_base_link">
+      <inertial>
+	<origin rpy=" 0 0 0" xyz="0 0 1.0"/>
+	<mass value="1"/>
+	<inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3"/>
+      </inertial>
+      <visual>
+	<origin xyz="0 0 ${length/2}"/>
+	<geometry>
+	  <cylinder length="${length}" radius="${radius}"/>
+	</geometry>
+	<material name="blue">
+	  <color rgba="0.0 0.0 0.8 1.0"/>
+	</material>
+      </visual>
+      <collision>
+	<origin xyz="0 0 ${length/2}"/>
+	<geometry>
+	  <cylinder length="${length}" radius="${radius}"/>
+	</geometry>
+	<material name="blue">
+	  <color rgba="0.0 0.0 0.8 1.0"/>
+	</material>
+      </collision>
+    </link>
+
+    <link name="${prefix}_upper_link">
+      <inertial>
+	<origin rpy=" 0 0 0" xyz="0 0 1.0"/>
+	<mass value="1"/>
+	<inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3"/>
+      </inertial>
+      <visual>
+	<origin xyz="0 0 ${length/2}"/>
+	<geometry>
+	  <cylinder length="${length}" radius="${radius}"/>
+	</geometry>
+	<material name="white">
+	  <color rgba="0.8 0.8 0.8 1.0"/>
+	</material>
+      </visual>
+      <collision>
+	<origin xyz="0 0 ${length/2}"/>
+	<geometry>
+	  <cylinder length="${length}" radius="${radius}"/>
+	</geometry>
+	<material name="white">
+	  <color rgba="0.8 0.8 0.8 1.0"/>
+	</material>
+      </collision>
+     </link>
+
+    <link name="${prefix}_tool"/>
+
+    <joint name="${prefix}_shoulder" type="revolute">
+      <parent link="${prefix}_base_link"/>
+      <child  link="${prefix}_upper_link"/>
+      <origin xyz="0 0 ${length}" rpy="0 0 0"/>
+      <limit lower="-1" upper="1" effort="10" velocity="1"/>
+    </joint>
+
+    <joint name="{prefix}_forearm" type="fixed">
+      <parent link="${prefix}_upper_link"/>
+      <child link="${prefix}_tool"/>
+      <origin xyz="0 0 ${length}" rpy="0 0 0"/>
+    </joint>
+
+    <gazebo>
+      <plugin filename="ismr24_system" name="ismr24_system">
+        <max_velocity> 1 </max_velocity>
+        <joint> ${prefix}_shoulder </joint>
+        <topic> enable </topic>
+      </plugin>
+    </gazebo>
+    
+    <gazebo reference="${prefix}_tool">
+
+      <sensor type="camera" name="tool_camera">
+	<update_rate> 30.0 </update_rate>
+	<always_on> 1 </always_on>
+	<topic> image </topic>
+	<camera name="tool">
+	  <horizontal_fov> 1.0 </horizontal_fov>
+	  <image>
+	    <width> 800 </width>
+	    <height> 800 </height>
+	    <format>R8G8B8</format>
+	  </image>
+	  <clip>
+	    <near> 0.02 </near>
+	    <far> 300 </far>
+	  </clip>
+	  <noise>
+	    <mean> 0.0 </mean>
+	    <stddev> 0.01 </stddev>
+	  </noise>
+	</camera>
+	<plugin filename="ignition-gazebo-sensors-system" name="ignition::gazebo::systems::Sensors"/>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+</robot>
